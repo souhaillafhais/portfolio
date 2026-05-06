@@ -53,7 +53,7 @@ export const WorkstationTitleAnimation = () => {
     let cancelled = false;
     const delay = (ms: number) => new Promise<void>((r) => window.setTimeout(r, ms));
     const typeMs = () => 165 + Math.random() * 95;
-    const deleteMs = () => 105 + Math.random() * 55;
+    const getDeleteMs = () => 105 + Math.random() * 55;
 
     const run = async () => {
       await delay(200);
@@ -78,7 +78,7 @@ export const WorkstationTitleAnimation = () => {
         for (let ln = NAME.length - 1; ln >= 0; ln--) {
           if (cancelled) return;
           setNameShown(NAME.slice(0, ln));
-          await delay(deleteMs());
+          await delay(getDeleteMs());
         }
 
         setCaretOnName(false);

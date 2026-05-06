@@ -2,7 +2,6 @@ import { useCallback, useState } from 'react';
 import { DeskView } from './components/DeskView';
 import { LoginGate } from './components/LoginGate';
 import { PortraitLayer } from './components/PortraitLayer';
-import './App.css';
 
 type Session = 'gate' | 'workspace';
 

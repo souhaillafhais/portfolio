@@ -27,7 +27,6 @@ export const WorkstationTitleAnimation = () => {
     let cancelled = false;
     const delay = (ms: number) => new Promise<void>((r) => window.setTimeout(r, ms));
     const typeMs = () => 165 + Math.random() * 95;
-    const deleteMs = () => 105 + Math.random() * 55;
 
     const typeWelcomeOnce = async () => {
       for (let i = 1; i <= WELCOME.length && !cancelled; i++) {

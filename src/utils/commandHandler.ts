@@ -1,5 +1,4 @@
 import {
-  ABOUT_TXT,
   CERTIFICATIONS_TXT,
   CONTACT_TXT,
   EDUCATION_TXT,
@@ -51,25 +50,18 @@ const AVAILABLE_COMMANDS = {
   help: 'Show all available commands',
   clear: 'Clear terminal output',
   whoami: 'Display profile summary',
-  about: 'Detailed introduction',
   skills: 'Technical skills matrix',
   experience: 'Internships & work experience',
   education: 'Academic background',
   certifications: 'Professional certifications',
-  certs: 'Alias for certifications',
   interests: 'Hobbies & volunteering',
   contact: 'Email, phone, LinkedIn & languages',
-  projects: 'Index of project files in ~/projects',
-  specs: 'Show Linux-style system specs',
-  system: 'Alias for specs',
-  arch: 'Print system architecture',
-  uname: 'Print system information',
+  specs: 'Show system specs (or: system)',
   theme: 'Palette: theme kali | theme ubuntu (aliases: dark / light)',
   pwd: 'Print working directory (POSIX path)',
   cd: 'Change directory (cd [path] | cd -)',
   ls: 'List directory contents (optional path)',
   cat: 'Concatenate and print files (cat FILE [FILE…])',
-  exit: 'Return to home directory (~)',
 };
 
 /** Sorted names used for tab-completion (documented commands only). */
@@ -105,8 +97,6 @@ export const executeCommand = (
       return handleClear();
     case 'whoami':
       return handleWhoami();
-    case 'about':
-      return handleAbout();
     case 'skills':
       return handleSkills();
     case 'experience':
@@ -114,21 +104,14 @@ export const executeCommand = (
     case 'education':
       return handleEducation();
     case 'certifications':
-    case 'certs':
       return handleCertifications();
     case 'interests':
       return handleInterests();
     case 'contact':
       return handleContact();
-    case 'projects':
-      return handleProjects();
     case 'specs':
     case 'system':
       return handleSpecs();
-    case 'arch':
-      return handleArch();
-    case 'uname':
-      return handleUname(args);
     case 'theme':
       return handleTheme(args, env);
     case 'pwd':
@@ -139,8 +122,6 @@ export const executeCommand = (
       return handleLs(args, cwd);
     case 'cat':
       return handleCat(args, cwd);
-    case 'exit':
-      return handleExit();
     default:
       return tryEasterEgg(command, args) ?? unknownCommand(parsed.commandLiteral);
   }
@@ -301,10 +282,14 @@ const handleHelp = (): CommandResult => {
     '',
     body,
     '',
-    'Quick content: experience | education | certifications | contact | interests',
-    '(same content as ~/experience.txt, etc.)',
+    'Quick shortcuts:',
+    '  Builtin commands: skills | experience | education | certifications',
+    '  (same content as ~/skills.txt, etc.)',
     '',
-    'Navigate like a workstation: ~/ holds text files plus projects/',
+    'File system:',
+    '  cd projects    Navigate to ~/projects',
+    '  cat about.txt  View my introduction',
+    '  ls ~/          List directory contents',
   ].join('\n');
 
   return { output: banner, type: 'info' };
@@ -331,31 +316,6 @@ const handleSpecs = (): CommandResult => ({
   type: 'success',
 });
 
-const handleArch = (): CommandResult => ({
-  output: [ASCII_PENGUIN, '', 'Linux Portfolio', '', 'x86_64'].join('\n'),
-  type: 'success',
-});
-
-const handleUname = (args: string[]): CommandResult => {
-  const full = args.includes('-a');
-  if (full) {
-    return {
-      output: [
-        ASCII_PENGUIN,
-        '',
-        'Linux Portfolio',
-        '',
-        'Linux portfolio 6.8.0-portfolio #1 SMP PREEMPT_DYNAMIC x86_64 GNU/Linux',
-      ].join('\n'),
-      type: 'success',
-    };
-  }
-  return {
-    output: [ASCII_PENGUIN, '', 'Linux Portfolio', '', 'Linux'].join('\n'),
-    type: 'success',
-  };
-};
-
 const handleClear = (): CommandResult => ({
   output: '',
   type: 'info',
@@ -366,11 +326,6 @@ const handleWhoami = (): CommandResult => ({
   output: `Souhail Lafhais | MIAGE Engineering Student — EMSI Casablanca
 Cybersecurity · Software Engineering · Artificial Intelligence
 portfolio-shell v1.0 · souhaillafhais@gmail.com`,
-  type: 'success',
-});
-
-const handleAbout = (): CommandResult => ({
-  output: ABOUT_TXT,
   type: 'success',
 });
 
@@ -402,18 +357,6 @@ const handleInterests = (): CommandResult => ({
 const handleContact = (): CommandResult => ({
   output: CONTACT_TXT,
   type: 'success',
-});
-
-const handleProjects = (): CommandResult => ({
-  output: `Project write-ups live under ~/projects/ :
-
-  project1.txt — IT monitoring & incident management (Technopure Morocco)
-  project2.txt — SOC lab & intrusion detection (EMSI)
-  project3.txt — Scalable cloud deployment & CI/CD (AWS, Docker, K8s)
-  project4.txt — AcciTrack mobile app (Spring Boot · React Native · MySQL)
-
-Try:  cd projects   then   ls   or   cat project1.txt`,
-  type: 'info',
 });
 
 const handlePwd = (cwd: PathSegments): CommandResult => ({
@@ -592,9 +535,3 @@ const handleCat = (args: string[], cwd: PathSegments): CommandResult => {
     type: sawStderr && !sawStdout ? 'error' : 'success',
   };
 };
-
-const handleExit = (): CommandResult => ({
-  output: 'Working directory set to ~',
-  type: 'info',
-  nextPath: ['home'],
-});

@@ -8,6 +8,7 @@ import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 
 interface DeskViewProps {
   onLogout: () => void;
+  onSwitchToCv: () => void;
 }
 
 /** Délais après apparition du titre : mise sous tension CRT → frappe CLI → panneau raccourcis. */
@@ -20,7 +21,7 @@ const LOGOUT_CRT_SETTLE_MS = 720;
 const LOGOUT_FADE_MS = 620;
 const LOGOUT_TOTAL_MS = LOGOUT_CRT_SETTLE_MS + LOGOUT_FADE_MS + 120;
 
-export const DeskView = ({ onLogout }: DeskViewProps) => {
+export const DeskView = ({ onLogout, onSwitchToCv }: DeskViewProps) => {
   const prefersReducedMotion = usePrefersReducedMotion();
   const [showHeader, setShowHeader] = useState(() => prefersReducedMotion);
   const [crtPowered, setCrtPowered] = useState(() => prefersReducedMotion);
@@ -118,6 +119,7 @@ export const DeskView = ({ onLogout }: DeskViewProps) => {
                 powered={crtPowered}
                 onTogglePower={() => setCrtPowered((v) => !v)}
                 onLogout={beginLogout}
+                onSwitchToCv={onSwitchToCv}
                 controlsLocked={isLoggingOut}
                 typingSoundEnabled={typingSoundEnabled}
                 onToggleTypingSound={() => setTypingSoundEnabled((v) => !v)}

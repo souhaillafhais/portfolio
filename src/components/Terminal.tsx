@@ -55,9 +55,9 @@ const pickLatencyMs = (line: string): number => {
   const roll = (min: number, max: number) =>
     Math.floor(min + Math.random() * (max - min + 1));
 
-  if (command === 'pwd' || command === 'ls' || command === 'help') return roll(12, 48);
-  if (command === 'cd') return roll(18, 72);
-  return roll(24, 92);
+  if (command === 'pwd' || command === 'ls' || command === 'help') return roll(2, 6);
+  if (command === 'cd') return roll(3, 8);
+  return roll(4, 12);
 };
 
 interface TerminalProps {

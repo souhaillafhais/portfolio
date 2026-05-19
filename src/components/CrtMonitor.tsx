@@ -21,13 +21,34 @@ function LogoutIcon({ className }: { className?: string }) {
   );
 }
 
+function CVIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+    >
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="12" x2="12" y1="11" y2="17" />
+      <line x1="9" x2="15" y1="14" y2="14" />
+    </svg>
+  );
+}
+
 interface CrtMonitorProps {
   children: ReactNode;
   powered: boolean;
   onTogglePower: () => void;
   /** Retour à l’écran de connexion. */
-  onLogout?: () => void;
-  /** Pendant la séquence de déconnexion : désactive interrupteur et logout. */
+  onLogout?: () => void;  /** Basculer vers la vue CV. */
+  onSwitchToCv?: () => void;  /** Pendant la séquence de déconnexion : désactive interrupteur et logout. */
   controlsLocked?: boolean;
   typingSoundEnabled?: boolean;
   onToggleTypingSound?: () => void;
@@ -42,6 +63,7 @@ export const CrtMonitor = ({
   powered,
   onTogglePower,
   onLogout,
+  onSwitchToCv,
   controlsLocked = false,
   typingSoundEnabled = true,
   onToggleTypingSound,
@@ -250,6 +272,23 @@ export const CrtMonitor = ({
                 title="Déconnexion"
               >
                 <LogoutIcon className="pointer-events-none h-[18px] w-[18px] sm:h-5 sm:w-5" />
+              </button>
+            </div>
+          ) : null}
+
+          {onSwitchToCv ? (
+            <div className={`flex items-center ${controlRail} p-px`}>
+              <button
+                type="button"
+                disabled={controlsLocked}
+                onClick={() => {
+                  if (!controlsLocked) onSwitchToCv();
+                }}
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-[5px] text-terminal-muted transition-colors hover:bg-terminal-surface/90 hover:text-terminal-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terminal-accent active:opacity-95 disabled:cursor-not-allowed disabled:opacity-45"
+                aria-label="Voir le CV interactif"
+                title="Vue CV"
+              >
+                <CVIcon className="pointer-events-none h-[18px] w-[18px] sm:h-5 sm:w-5" />
               </button>
             </div>
           ) : null}

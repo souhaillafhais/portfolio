@@ -8,6 +8,14 @@ import {
   BulletIcon,
 } from './Icons';
 
+const certificationPreviewImages = import.meta.glob('../assets/certifications/*', {
+  eager: true,
+  as: 'url',
+}) as Record<string, string>;
+
+const getCertificationPreviewImage = (imagePath: string) =>
+  certificationPreviewImages[`../assets/${imagePath}`] ?? '';
+
 interface CVViewProps {
   onLogout: () => void;
 }
@@ -136,7 +144,7 @@ export const CVView = ({ onLogout }: CVViewProps) => {
             </div>
             <div className="p-6 flex justify-center">
               <img
-                src={`/src/assets/${selectedCert.preview.imagePath}`}
+                src={getCertificationPreviewImage(selectedCert.preview.imagePath)}
                 alt={selectedCert.preview.title}
                 className="max-w-full max-h-[60vh] rounded"
                 style={{

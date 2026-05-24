@@ -49,7 +49,7 @@ export const CommandShortcuts = () => {
   return (
     <div className="rounded-lg border border-terminal-border bg-terminal-surface/90 p-4 shadow-[inset_0_1px_0_rgb(255_255_255/0.04),0_14px_32px_-12px_rgb(0_0_0/0.45)] backdrop-blur-[2px]">
       <p className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-terminal-muted">
-        Quick paste
+        Quick commands
       </p>
       <ul className="flex flex-col gap-2 font-mono text-sm">
         {SHORTCUTS.map(({ label, command }) => {

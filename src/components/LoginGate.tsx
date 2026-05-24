@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
-import gatePortrait from '../assets/photo.jpg';
 import {
   isAnswerCorrect,
   pickRandomQuestion,
@@ -13,7 +12,7 @@ interface LoginGateProps {
   lastQuestionIdKey: string;
 }
 
-/** Page login épurée : photo centrée, question, mot de passe, bouton — sans carte ni cadre. */
+/** Page login épurée : photo en haut de la zone de question, mot de passe, bouton — sans carte ni cadre. */
 export const LoginGate = ({ onPassed, lastQuestionIdKey, gateSession }: LoginGateProps) => {
   const reduceMotion = usePrefersReducedMotion();
   const question = useMemo<SecurityQuestion>(() => {
@@ -35,7 +34,6 @@ export const LoginGate = ({ onPassed, lastQuestionIdKey, gateSession }: LoginGat
   }, [lastQuestionIdKey, gateSession]);
   const [value, setValue] = useState('');
   const [hint, setHint] = useState<string | null>(null);
-  const [photoBroken, setPhotoBroken] = useState(false);
   const [authenticating, setAuthenticating] = useState(false);
 
   useEffect(() => {
@@ -62,24 +60,6 @@ export const LoginGate = ({ onPassed, lastQuestionIdKey, gateSession }: LoginGat
     submit();
   };
 
-  const drift = !reduceMotion && !authenticating ? 'login-gate-portrait-drift' : '';
-
-  const avatarInner = !photoBroken ? (
-    <img
-      src={gatePortrait}
-      alt=""
-      width={176}
-      height={176}
-      className="h-full w-full object-cover"
-      draggable={false}
-      onError={() => setPhotoBroken(true)}
-    />
-  ) : (
-    <div className="flex h-full w-full items-center justify-center font-mono text-lg font-semibold text-terminal-accent">
-      SL
-    </div>
-  );
-
   return (
     <div
       className="portfolio-login-enter relative z-[40] flex min-h-svh flex-col items-center justify-center bg-terminal-bg px-6 py-10 font-[system-ui,'Segoe_UI',Roboto,'Helvetica_Neue',sans-serif]"
@@ -94,11 +74,7 @@ export const LoginGate = ({ onPassed, lastQuestionIdKey, gateSession }: LoginGat
         className={`flex w-full max-w-[22rem] flex-col items-center ${authenticating ? 'pointer-events-none' : ''}`}
         aria-busy={authenticating}
       >
-        <div
-          className={`relative mb-8 h-[6.875rem] w-[6.875rem] shrink-0 overflow-hidden rounded-full ${drift}`}
-        >
-          {avatarInner}
-        </div>
+        <div className="mb-8 mt-20 flex items-center justify-center" />
 
         <p
           className={`w-full text-center text-sm leading-relaxed text-terminal-dim transition-opacity duration-300 ${authenticating ? 'pointer-events-none opacity-35' : ''}`}

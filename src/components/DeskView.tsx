@@ -24,7 +24,7 @@ export const DeskView = ({ onLogout, onSwitchToCv }: DeskViewProps) => {
   const prefersReducedMotion = usePrefersReducedMotion();
   const [showHeader, setShowHeader] = useState(() => prefersReducedMotion);
   const [crtPowered, setCrtPowered] = useState(() => prefersReducedMotion);
-  const [shortcutsVisible, setShortcutsVisible] = useState(false);
+  const [shortcutsVisible, setShortcutsVisible] = useState(true);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [deskFadeOut, setDeskFadeOut] = useState(false);
   const [typingSoundEnabled, setTypingSoundEnabled] = useState(true);

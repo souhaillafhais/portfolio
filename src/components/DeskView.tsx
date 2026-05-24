@@ -13,7 +13,6 @@ interface DeskViewProps {
 
 /** Délais après apparition du titre : mise sous tension CRT → frappe CLI → panneau raccourcis. */
 const INTRO_HEADER_TO_CRT_MS = 760;
-const INTRO_CRT_TO_CLI_MS = 880;
 const INTRO_SHOW_HEADER_MS = 2000;
 
 /** Après extinction CRT : fondu bureau puis passage login (ms). */
@@ -25,15 +24,10 @@ export const DeskView = ({ onLogout, onSwitchToCv }: DeskViewProps) => {
   const prefersReducedMotion = usePrefersReducedMotion();
   const [showHeader, setShowHeader] = useState(() => prefersReducedMotion);
   const [crtPowered, setCrtPowered] = useState(() => prefersReducedMotion);
-  const [welcomeActive, setWelcomeActive] = useState(() => prefersReducedMotion);
   const [shortcutsVisible, setShortcutsVisible] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [deskFadeOut, setDeskFadeOut] = useState(false);
   const [typingSoundEnabled, setTypingSoundEnabled] = useState(true);
-
-  const handleSequentialWelcomeDone = useCallback(() => {
-    setShortcutsVisible(true);
-  }, []);
 
   const beginLogout = useCallback(() => {
     if (isLoggingOut) return;
@@ -64,7 +58,6 @@ export const DeskView = ({ onLogout, onSwitchToCv }: DeskViewProps) => {
     if (prefersReducedMotion) {
       setShowHeader(true);
       setCrtPowered(true);
-      setWelcomeActive(true);
       return undefined;
     }
 
@@ -76,17 +69,10 @@ export const DeskView = ({ onLogout, onSwitchToCv }: DeskViewProps) => {
     if (!showHeader || prefersReducedMotion) return;
 
     setCrtPowered(false);
-    setWelcomeActive(false);
 
     const tCrtOn = window.setTimeout(() => setCrtPowered(true), INTRO_HEADER_TO_CRT_MS);
-    const tWelcome = window.setTimeout(
-      () => setWelcomeActive(true),
-      INTRO_HEADER_TO_CRT_MS + INTRO_CRT_TO_CLI_MS,
-    );
-
     return () => {
       window.clearTimeout(tCrtOn);
-      window.clearTimeout(tWelcome);
     };
   }, [showHeader, prefersReducedMotion]);
 
@@ -126,9 +112,6 @@ export const DeskView = ({ onLogout, onSwitchToCv }: DeskViewProps) => {
               >
                 <Terminal
                   embedded
-                  stagedIntro
-                  introActive={prefersReducedMotion ? true : welcomeActive}
-                  onIntroSequenceComplete={handleSequentialWelcomeDone}
                   typingSoundEnabled={typingSoundEnabled}
                 />
               </CrtMonitor>

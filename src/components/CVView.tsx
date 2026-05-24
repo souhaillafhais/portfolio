@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, type CSSProperties } from 'react';
 import { CERTIFICATIONS, type Certification } from '../data/certifications';
 import {
   EmailIcon,
@@ -6,10 +6,6 @@ import {
   LinkedInIcon,
   LocationIcon,
   BulletIcon,
-  CheckIcon,
-  CalendarIcon,
-  AwardIcon,
-  BriefcaseIcon,
 } from './Icons';
 
 interface CVViewProps {
@@ -35,7 +31,7 @@ export const CVView = ({ onLogout }: CVViewProps) => {
     <div className="relative min-h-svh w-full overflow-hidden" style={{ backgroundColor: 'var(--term-bg)', color: 'var(--term-text)' }}>
       {/* Background */}
       <div className="fixed inset-0 opacity-5" style={{ backgroundColor: 'var(--term-surf)' }}>
-        <div className="absolute inset-0 bg-gradient-to-br" style={{ '--tw-gradient-from': 'var(--term-accent)', '--tw-gradient-to': 'var(--term-muted)' } as React.CSSProperties}></div>
+        <div className="absolute inset-0 bg-gradient-to-br" style={{ '--tw-gradient-from': 'var(--term-accent)', '--tw-gradient-to': 'var(--term-muted)' } as CSSProperties}></div>
       </div>
 
       {/* Main Container */}
@@ -116,7 +112,7 @@ export const CVView = ({ onLogout }: CVViewProps) => {
               backgroundColor: 'var(--term-surf)',
               borderColor: 'var(--term-accent)',
               borderWidth: '1px',
-              borderOpacity: '0.3',
+              border: '1px solid rgba(255,255,255,0.3)'
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -492,7 +488,7 @@ function SkillsSection() {
                   color: 'var(--term-accent)',
                   borderColor: 'var(--term-accent)',
                   borderWidth: '1px',
-                  borderOpacity: '0.2',
+                  border: '1px solid rgba(255,255,255,0.3)'
                 }}
               >
                 {skill}
@@ -504,3 +500,4 @@ function SkillsSection() {
     </div>
   );
 }
+

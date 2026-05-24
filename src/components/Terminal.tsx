@@ -2,7 +2,6 @@ import { useState, useRef, useEffect, useCallback, type KeyboardEvent, type Poin
 import { OutputLine } from './OutputLine';
 import { CommandInput } from './CommandInput';
 import { TypingReveal } from './TypingReveal';
-import { TerminalSequentialWelcome } from './TerminalSequentialWelcome';
 import { executeCommand, REGISTERED_COMMANDS, type CommandOutputSegment } from '../utils/commandHandler';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import { usePortfolioTheme } from '../theme/portfolioTheme';
@@ -63,18 +62,11 @@ const pickLatencyMs = (line: string): number => {
 interface TerminalProps {
   /** Renders inside CRT/workspace — fills parent instead of full viewport centering. */
   embedded?: boolean;
-  /** Accueil progressif après login : attend `introActive` puis frappe les lignes puis signale la fin au parent. */
-  stagedIntro?: boolean;
-  introActive?: boolean;
-  onIntroSequenceComplete?: () => void;
   typingSoundEnabled?: boolean;
 }
 
 export const Terminal = ({
   embedded = false,
-  stagedIntro = false,
-  introActive = true,
-  onIntroSequenceComplete,
   typingSoundEnabled = true,
 }: TerminalProps) => {
   const prefersReducedMotion = usePrefersReducedMotion();
@@ -83,17 +75,6 @@ export const Terminal = ({
   const themeRef = useRef(theme);
   themeRef.current = theme;
 
-  const [introSequenceDone, setIntroSequenceDone] = useState(() => !stagedIntro);
-
-  useEffect(() => {
-    if (!stagedIntro || introActive) return;
-    setIntroSequenceDone(false);
-  }, [introActive, stagedIntro]);
-
-  const handleIntroSequentialDone = useCallback(() => {
-    setIntroSequenceDone(true);
-    onIntroSequenceComplete?.();
-  }, [onIntroSequenceComplete]);
 
   const [input, setInput] = useState('');
   const [cwd, setCwd] = useState<PathSegments>(['home']);
@@ -259,8 +240,7 @@ export const Terminal = ({
     })();
   };
 
-  const commandLineVisible =
-    Boolean(output.length > 0 || introSequenceDone || !stagedIntro);
+  const commandLineVisible = true;
 
   const handleWorkspacePointerUp = (e: PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
@@ -323,21 +303,7 @@ export const Terminal = ({
             className="terminal-scroll-area flex min-h-0 flex-1 cursor-text flex-col overflow-x-auto overflow-y-scroll overscroll-y-contain pb-2"
             onPointerUp={handleWorkspacePointerUp}
           >
-            {output.length === 0 && stagedIntro && (
-              <>
-                {!introActive ? (
-                  <div className="mb-2 min-h-[9.25rem]" aria-hidden />
-                ) : (
-                  <TerminalSequentialWelcome
-                    prefersReducedMotion={prefersReducedMotion}
-                    onTick={scrollTickDuringTyping}
-                    onComplete={handleIntroSequentialDone}
-                  />
-                )}
-              </>
-            )}
-
-            {output.length === 0 && !stagedIntro && (
+            {output.length === 0 && (
               <div className="mb-2 space-y-2">
                 <OutputLine type="default">Welcome — Souhail Lafhais (MIAGE · EMSI Casablanca)</OutputLine>
                 <OutputLine type="default">

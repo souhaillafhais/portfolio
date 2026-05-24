@@ -149,7 +149,7 @@ export const CVView = ({ onLogout }: CVViewProps) => {
                   img.style.display = 'none';
                   const errorMsg = document.createElement('div');
                   errorMsg.style.color = 'var(--term-muted)';
-                  errorMsg.textContent = `Image not found: ${selectedCert.preview.imagePath}. Please add the image to the assets/certifications/ folder.`;
+                  errorMsg.textContent = `Image not found: ${selectedCert.preview.imagePath}. Please add the image to public/assets/certifications/ and rebuild.`;
                   img.parentElement?.appendChild(errorMsg);
                 }}
               />

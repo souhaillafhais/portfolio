@@ -8,13 +8,7 @@ import {
   BulletIcon,
 } from './Icons';
 
-const certificationPreviewImages = import.meta.glob('../assets/certifications/*', {
-  eager: true,
-  as: 'url',
-}) as Record<string, string>;
-
-const getCertificationPreviewImage = (imagePath: string) =>
-  certificationPreviewImages[`../assets/${imagePath}`] ?? '';
+const getCertificationPreviewImage = (imagePath: string) => `/assets/${imagePath}`;
 
 interface CVViewProps {
   onLogout: () => void;

@@ -12,7 +12,7 @@ export interface Certification {
   skills: string[];
   preview: {
     title: string;
-    imagePath: string; // Path to image in /src/assets/certifications/
+    imagePath: string; // Path to image in /assets/certifications/ (public folder)
   };
 }
 

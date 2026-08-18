@@ -3,7 +3,6 @@ import { DeskView } from './components/DeskView';
 import { PortraitLayer } from './components/PortraitLayer';
 import { CVView } from './components/CVView';
 import { LoginGate } from './components/LoginGate';
-import './App.css';
 
 type Session = 'login' | 'workspace' | 'cv';
 

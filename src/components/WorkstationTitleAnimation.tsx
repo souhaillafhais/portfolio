@@ -10,19 +10,18 @@ const WELCOME = 'Welcome to my workstation.';
  */
 export const WorkstationTitleAnimation = () => {
   const reduceMotion = usePrefersReducedMotion();
-  const [nameShown, setNameShown] = useState(() => (reduceMotion ? NAME : ''));
-  const [welcomeShown, setWelcomeShown] = useState(() => (reduceMotion ? WELCOME : ''));
-  const [welcomeComplete, setWelcomeComplete] = useState(reduceMotion);
+  const [nameTyped, setNameTyped] = useState('');
+  const [welcomeTyped, setWelcomeTyped] = useState('');
+  const [welcomeTypingDone, setWelcomeTypingDone] = useState(false);
   const [caretOnName, setCaretOnName] = useState(false);
 
+  /* En mouvement réduit tout s’affiche d’emblée — dérivé du rendu, sans état à forcer. */
+  const nameShown = reduceMotion ? NAME : nameTyped;
+  const welcomeShown = reduceMotion ? WELCOME : welcomeTyped;
+  const welcomeComplete = reduceMotion || welcomeTypingDone;
+
   useEffect(() => {
-    if (reduceMotion) {
-      setWelcomeShown(WELCOME);
-      setWelcomeComplete(true);
-      setNameShown(NAME);
-      setCaretOnName(false);
-      return;
-    }
+    if (reduceMotion) return;
 
     let cancelled = false;
     const delay = (ms: number) => new Promise<void>((r) => window.setTimeout(r, ms));
@@ -30,12 +29,12 @@ export const WorkstationTitleAnimation = () => {
 
     const typeWelcomeOnce = async () => {
       for (let i = 1; i <= WELCOME.length && !cancelled; i++) {
-        setWelcomeShown(WELCOME.slice(0, i));
+        setWelcomeTyped(WELCOME.slice(0, i));
         await delay(typeMs());
       }
       if (!cancelled) {
-        setWelcomeComplete(true);
-        setWelcomeShown(WELCOME);
+        setWelcomeTypingDone(true);
+        setWelcomeTyped(WELCOME);
       }
     };
 
@@ -59,14 +58,14 @@ export const WorkstationTitleAnimation = () => {
       if (cancelled) return;
 
       while (!cancelled) {
-        setNameShown('');
+        setNameTyped('');
         setCaretOnName(true);
         await delay(140);
         if (cancelled) return;
 
         for (let i = 1; i <= NAME.length; i++) {
           if (cancelled) return;
-          setNameShown(NAME.slice(0, i));
+          setNameTyped(NAME.slice(0, i));
           await delay(typeMs());
         }
 
@@ -76,7 +75,7 @@ export const WorkstationTitleAnimation = () => {
         setCaretOnName(true);
         for (let ln = NAME.length - 1; ln >= 0; ln--) {
           if (cancelled) return;
-          setNameShown(NAME.slice(0, ln));
+          setNameTyped(NAME.slice(0, ln));
           await delay(getDeleteMs());
         }
 

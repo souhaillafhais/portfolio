@@ -74,7 +74,8 @@ export const LoginGate = ({ onPassed, lastQuestionIdKey, gateSession }: LoginGat
         className={`flex w-full max-w-[22rem] flex-col items-center ${authenticating ? 'pointer-events-none' : ''}`}
         aria-busy={authenticating}
       >
-        <div className="mb-8 mt-20 flex items-center justify-center" />
+        {/* Réserve la place du portrait, rendu en position fixed par <PortraitLayer />. */}
+        <div className="mb-8 mt-20" aria-hidden />
 
         <p
           className={`w-full text-center text-sm leading-relaxed text-terminal-dim transition-opacity duration-300 ${authenticating ? 'pointer-events-none opacity-35' : ''}`}

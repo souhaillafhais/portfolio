@@ -54,12 +54,9 @@ export const DeskView = ({ onLogout, onSwitchToCv }: DeskViewProps) => {
     };
   }, [isLoggingOut, onLogout, prefersReducedMotion]);
 
+  /* En mouvement réduit, les deux états démarrent déjà à `true` (cf. useState ci-dessus). */
   useEffect(() => {
-    if (prefersReducedMotion) {
-      setShowHeader(true);
-      setCrtPowered(true);
-      return undefined;
-    }
+    if (prefersReducedMotion) return;
 
     const tShowHeader = window.setTimeout(() => setShowHeader(true), INTRO_SHOW_HEADER_MS);
     return () => window.clearTimeout(tShowHeader);
@@ -67,8 +64,6 @@ export const DeskView = ({ onLogout, onSwitchToCv }: DeskViewProps) => {
 
   useEffect(() => {
     if (!showHeader || prefersReducedMotion) return;
-
-    setCrtPowered(false);
 
     const tCrtOn = window.setTimeout(() => setCrtPowered(true), INTRO_HEADER_TO_CRT_MS);
     return () => {

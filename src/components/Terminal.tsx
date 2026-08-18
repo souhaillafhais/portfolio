@@ -4,7 +4,7 @@ import { CommandInput } from './CommandInput';
 import { TypingReveal } from './TypingReveal';
 import { executeCommand, REGISTERED_COMMANDS, type CommandOutputSegment } from '../utils/commandHandler';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
-import { usePortfolioTheme } from '../theme/portfolioTheme';
+import { usePortfolioTheme } from '../theme/portfolioThemeContext';
 import { parseCommandLine } from '../utils/parseCommandLine';
 import { applyTabCompletion } from '../utils/tabCompletion';
 import { formatPromptPath, pathsEqual, type PathSegments } from '../fs/virtualFileSystem';
@@ -72,13 +72,16 @@ export const Terminal = ({
   const prefersReducedMotion = usePrefersReducedMotion();
   const { tick } = useTypewriterSound(typingSoundEnabled);
   const { theme, setTheme } = usePortfolioTheme();
-  const themeRef = useRef(theme);
-  themeRef.current = theme;
-
 
   const [input, setInput] = useState('');
   const [cwd, setCwd] = useState<PathSegments>(['home']);
   const [output, setOutput] = useState<TerminalOutput[]>([]);
+  /**
+   * Annonce lecteur d’écran. `id` force une mutation du DOM même quand le texte est identique
+   * (commande relancée), sinon la région live ne rejoue pas le message.
+   */
+  const [announcement, setAnnouncement] = useState({ id: 0, text: '' });
+  const announceSeqRef = useRef(0);
   const terminalEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const cwdRef = useRef<PathSegments>(cwd);
@@ -108,6 +111,11 @@ export const Terminal = ({
     requestAnimationFrame(() => {
       terminalEndRef.current?.scrollIntoView({ behavior: 'auto', block: 'end' });
     });
+  }, []);
+
+  const announce = useCallback((text: string) => {
+    announceSeqRef.current += 1;
+    setAnnouncement({ id: announceSeqRef.current, text });
   }, []);
 
   const pushHistory = (entry: string) => {
@@ -207,12 +215,13 @@ export const Terminal = ({
       const result = executeCommand(trimmedInput, cwdSnapshot, {
         oldPwd: oldPwdRef.current,
         applyPortfolioTheme: setTheme,
-        getPortfolioTheme: () => themeRef.current,
+        getPortfolioTheme: () => theme,
       });
 
       if (result.clear) {
         setOutput([]);
         setInput('');
+        announce('Terminal cleared.');
         queueMicrotask(() => inputRef.current?.focus({ preventScroll: true }));
         return;
       }
@@ -236,6 +245,11 @@ export const Terminal = ({
 
       setOutput((prev) => [...prev, newOutput]);
       setInput('');
+
+      /* La révélation caractère par caractère est inaudible : on annonce le résultat complet. */
+      const spoken = (result.segments?.map((seg) => seg.text).join('\n') ?? result.output ?? '').trim();
+      announce(spoken || `${trimmedInput}: done.`);
+
       queueMicrotask(() => inputRef.current?.focus({ preventScroll: true }));
     })();
   };
@@ -297,6 +311,10 @@ export const Terminal = ({
             secure
           </span>
         </header>
+
+        <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+          <span key={announcement.id}>{announcement.text}</span>
+        </div>
 
         <div className="relative flex min-h-0 flex-1 flex-col px-4 py-5 font-mono text-[0.8125rem] leading-relaxed text-terminal-text sm:px-6 sm:text-sm">
           <div

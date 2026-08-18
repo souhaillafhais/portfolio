@@ -24,7 +24,8 @@ html[data-portfolio-theme='kali'] {
   --term-surf: #0b1016;
   --term-header: #0d151c;
   --term-text: #5cff8a;
-  --term-muted: #447753;
+  /* 4,94:1 sur --term-bg — WCAG AA pour le texte normal (#447753 ne donnait que 3,86:1). */
+  --term-muted: #4f8a5f;
   --term-dim: #7aae8a;
   --term-accent: #43ddcf;
   --term-border: #1f3f32;
@@ -558,25 +559,6 @@ html[data-portfolio-theme='oceanic'] {
 }
 
 /* Login gate — léger mouvement horizontal automatique du portrait (double garde avec le hook RM) */
-@keyframes login-gate-portrait-drift {
-  from {
-    transform: translateX(-12px);
-  }
-  to {
-    transform: translateX(16px);
-  }
-}
-
-.login-gate-portrait-drift {
-  animation: login-gate-portrait-drift 5.5s cubic-bezier(0.42, 0, 0.58, 1) infinite alternate;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .login-gate-portrait-drift {
-    animation: none;
-    transform: translateX(0);
-  }
-}
 
 /* Entrée login après déconnexion */
 @keyframes portfolio-login-enter {

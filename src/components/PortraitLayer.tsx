@@ -14,25 +14,22 @@ export const PortraitLayer = ({ position }: PortraitLayerProps) => {
   const reduceMotion = usePrefersReducedMotion();
   const [photoBroken, setPhotoBroken] = useState(false);
   const [entered, setEntered] = useState(false);
+  const [renderedPosition, setRenderedPosition] = useState(position);
   const isDocked = position === 'docked';
 
+  /* Ajustement d’état pendant le rendu — motif React pour réagir au changement d’une prop. */
+  if (renderedPosition !== position) {
+    setRenderedPosition(position);
+    setEntered(reduceMotion && position === 'docked');
+  }
+
   useEffect(() => {
-    if (position === 'login') {
-      setEntered(false);
-      return;
-    }
+    if (!isDocked || reduceMotion || entered) return;
 
-    if (!isDocked) return;
-    if (reduceMotion) {
-      setEntered(true);
-      return;
-    }
-
-    setEntered(false);
     /* Laisser le navigateur composer la pose initiale avant de basculer (sinon pas d’interpolation). */
     const id = window.setTimeout(() => setEntered(true), 160);
     return () => window.clearTimeout(id);
-  }, [position, isDocked, reduceMotion]);
+  }, [isDocked, reduceMotion, entered]);
 
   if (position === 'hidden') {
     return null;
@@ -83,7 +80,7 @@ export const PortraitLayer = ({ position }: PortraitLayerProps) => {
         href={LINKEDIN_PROFILE_URL}
         target="_blank"
         rel="noopener noreferrer me"
-        className="pointer-events-auto absolute inset-0 z-[1] rounded-inherit outline-none hover:opacity-[0.96] focus-visible:ring-2 focus-visible:ring-terminal-accent focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--term-bg)]"
+        className="pointer-events-auto absolute inset-0 z-[1] rounded-full outline-none hover:opacity-[0.96] focus-visible:ring-2 focus-visible:ring-terminal-accent focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--term-bg)]"
         aria-label="Souhail Lafhais — ouvrir LinkedIn"
         title="LinkedIn"
       />

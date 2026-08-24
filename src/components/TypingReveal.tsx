@@ -32,13 +32,22 @@ export const TypingReveal = ({
   const { tick } = useTypewriterSound();
   const onTickRef = useRef(onTick);
   const onCompleteRef = useRef(onComplete);
+  const soundRef = useRef({ enabled: withTypewriterSound, tick });
 
   useEffect(() => {
     onTickRef.current = onTick;
     onCompleteRef.current = onComplete;
+    soundRef.current = { enabled: withTypewriterSound, tick };
   });
 
   const [shown, setShown] = useState('');
+  const [revealedFor, setRevealedFor] = useState({ text, slow });
+
+  /* Repart de zéro quand la source change — ajustement pendant le rendu plutôt qu’un effet. */
+  if (revealedFor.text !== text || revealedFor.slow !== slow) {
+    setRevealedFor({ text, slow });
+    setShown('');
+  }
 
   useEffect(() => {
     let raf = 0;
@@ -63,7 +72,7 @@ export const TypingReveal = ({
       if (len !== prevLen) {
         prevLen = len;
         onTickRef.current?.();
-        if (withTypewriterSound) tick();
+        if (soundRef.current.enabled) soundRef.current.tick();
       }
 
       setShown(slice);
@@ -76,9 +85,6 @@ export const TypingReveal = ({
       }
     };
 
-    /* eslint-disable react-hooks/set-state-in-effect -- rAF-driven progressive reveal needs an initial empty frame */
-    setShown('');
-    /* eslint-enable react-hooks/set-state-in-effect */
     raf = requestAnimationFrame(loop);
 
     return () => {

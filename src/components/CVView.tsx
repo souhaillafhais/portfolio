@@ -1,4 +1,4 @@
-import { useCallback, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { CERTIFICATIONS, type Certification } from '../data/certifications';
 import {
   EmailIcon,
@@ -7,7 +7,7 @@ import {
   LocationIcon,
   BulletIcon,
 } from './Icons';
-import { usePortfolioTheme } from '../theme/portfolioTheme';
+import { usePortfolioTheme } from '../theme/portfolioThemeContext';
 import {
   PORTFOLIO_THEME_IDS,
   type PortfolioThemeId,
@@ -31,6 +31,28 @@ export const CVView = ({ onLogout }: CVViewProps) => {
   const handleCloseCertPopup = useCallback(() => {
     setSelectedCert(null);
   }, []);
+
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const lastFocusedRef = useRef<HTMLElement | null>(null);
+  const isCertOpen = selectedCert !== null;
+
+  /* Modale : focus à l’ouverture, Échap pour fermer, focus rendu à la carte d’origine. */
+  useEffect(() => {
+    if (!isCertOpen) return;
+
+    lastFocusedRef.current = document.activeElement as HTMLElement | null;
+    dialogRef.current?.focus();
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') handleCloseCertPopup();
+    };
+    document.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      lastFocusedRef.current?.focus();
+    };
+  }, [isCertOpen, handleCloseCertPopup]);
 
   return (
     <div className="relative min-h-svh w-full overflow-hidden font-sans antialiased text-base leading-7" style={{ backgroundColor: 'var(--term-bg)', color: 'var(--term-text)' }}>
@@ -133,13 +155,22 @@ export const CVView = ({ onLogout }: CVViewProps) => {
           onClick={handleCloseCertPopup}
         >
           <div
-            className="w-full max-w-xl max-h-[85vh] overflow-hidden rounded-[2.5rem] border border-terminal-border/70 bg-terminal-surface/96 shadow-2xl"
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cert-dialog-title"
+            tabIndex={-1}
+            className="w-full max-w-xl max-h-[85vh] overflow-hidden rounded-[2.5rem] border border-terminal-border/70 bg-terminal-surface/96 shadow-2xl outline-none"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex flex-col gap-4 p-5 sm:p-6">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold" style={{ color: 'var(--term-accent)' }}>
+                  <h2
+                    id="cert-dialog-title"
+                    className="text-2xl font-bold"
+                    style={{ color: 'var(--term-accent)' }}
+                  >
                     {selectedCert.preview.title}
                   </h2>
                   <p className="text-sm mt-2" style={{ color: 'var(--term-muted)' }}>
@@ -373,7 +404,7 @@ function EducationSection() {
             </p>
             <div className="mt-3">
               <span className="inline-block px-3 py-1 text-xs font-mono rounded" style={{
-                backgroundColor: 'rgba(67, 221, 207, 0.12)',
+                backgroundColor: 'color-mix(in srgb, var(--term-accent) 12%, transparent)',
                 color: 'var(--term-accent)',
                 borderWidth: '0px',
               }}>
@@ -412,7 +443,10 @@ function CertificationsSection({
             className="w-full rounded-3xl border p-5 text-left transition-all hover:-translate-y-0.5"
             style={{
               borderColor: selectedCert?.id === cert.id ? 'var(--term-accent)' : 'var(--term-border)',
-              backgroundColor: selectedCert?.id === cert.id ? 'rgba(67, 221, 207, 0.08)' : 'transparent',
+              backgroundColor:
+                selectedCert?.id === cert.id
+                  ? 'color-mix(in srgb, var(--term-accent) 8%, transparent)'
+                  : 'transparent',
             }}
           >
             <div className="flex items-center justify-between gap-4">
@@ -526,9 +560,9 @@ function SkillsSection() {
                   key={i}
                   className="px-3 py-1 text-xs rounded"
                   style={{
-                    backgroundColor: 'rgba(67, 221, 207, 0.12)',
+                    backgroundColor: 'color-mix(in srgb, var(--term-accent) 12%, transparent)',
                     color: 'var(--term-accent)',
-                    border: '1px solid rgba(255,255,255,0.2)',
+                    border: '1px solid var(--term-border)',
                   }}
                 >
                   {skill}

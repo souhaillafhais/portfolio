@@ -1,4 +1,5 @@
 import { LINKEDIN_PROFILE_URL } from '../constants/socialLinks';
+import { CERTIFICATIONS } from '../data/certifications';
 
 /**
  * Canonical portfolio copy — Souhail Lafhais (English).
@@ -97,17 +98,21 @@ SCIENTIFIC BACCALAUREATE — PHYSICS & CHEMISTRY
   2020 · Casablanca
 `;
 
+/** Largeur du cadre ASCII ci-dessus ; au-delà, l’organisme passe à la ligne suivante. */
+const CERT_LINE_WIDTH = 80;
+
+/** Généré depuis `data/certifications.ts` pour que le terminal et le CV ne divergent jamais. */
+const CERTIFICATION_LINES = CERTIFICATIONS.map((cert) => {
+  const head = `  • ${cert.title} (${cert.date})`;
+  const tail = ` — ${cert.issuer}`;
+  return head.length + tail.length <= CERT_LINE_WIDTH ? head + tail : `${head}\n    — ${cert.issuer}`;
+}).join('\n');
+
 export const CERTIFICATIONS_TXT = `================================================================================
   CERTIFICATIONS.TXT                credentials
 ================================================================================
 
-  • Oracle Cloud Infrastructure 2025 Certified DevOps Professional — Oracle
-  • Virtual Networks in Microsoft Azure (2025) — WhizLabs
-  • Cybersecurity compliance frameworks, standards & regulations (2025) — IBM
-  • The Unix Workbench (2024) — Johns Hopkins University
-  • Delivering Quality Work with Agility — IBM
-  • Software Engineering: Design & Project Management (2024) —
-    Hong Kong University of Science and Technology
+${CERTIFICATION_LINES}
 `;
 
 export const INTERESTS_TXT = `================================================================================

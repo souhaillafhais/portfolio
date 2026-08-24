@@ -1,5 +1,11 @@
 /**
- * Detailed certifications with preview data
+ * Source unique des certifications.
+ *
+ * Alimente à la fois la vue CV (cartes + popup d’aperçu) et `CERTIFICATIONS_TXT`
+ * (commande `certifications` / `cat certifications.txt`) — voir `content/portfolioCopy.ts`.
+ * Toute nouvelle certification s’ajoute ici et nulle part ailleurs.
+ *
+ * `date` porte l’année : ne pas la répéter dans `title`.
  */
 
 export interface Certification {
@@ -12,7 +18,8 @@ export interface Certification {
   skills: string[];
   preview: {
     title: string;
-    imagePath: string; // Path to image in /assets/certifications/ (public folder)
+    /** Chemin relatif à /assets/ dans le dossier public. */
+    imagePath: string;
   };
 }
 
@@ -33,7 +40,7 @@ export const CERTIFICATIONS: Certification[] = [
   },
   {
     id: 'azure-vnet',
-    title: 'Virtual Networks in Microsoft Azure (2025)',
+    title: 'Virtual Networks in Microsoft Azure',
     issuer: 'WhizLabs',
     date: '2025',
     description:
@@ -44,31 +51,29 @@ export const CERTIFICATIONS: Certification[] = [
       imagePath: 'certifications/vnet.jpg',
     },
   },
-
   {
-  id: 'penn-java-oop',
-  title: 'Introduction to Java and Object-Oriented Programming',
-  issuer: 'University of Pennsylvania',
-  date: '2025',
-  description:
-    'Course focused on Java fundamentals and object-oriented programming concepts including classes, inheritance, polymorphism, and software development best practices.',
-  skills: [
-    'Java',
-    'Object-Oriented Programming',
-    'Classes & Objects',
-    'Inheritance',
-    'Polymorphism',
-    'Software Development',
-  ],
-  preview: {
-    title: 'Java & OOP',
-    imagePath: 'certifications/java.jpg',
+    id: 'penn-java-oop',
+    title: 'Introduction to Java and Object-Oriented Programming',
+    issuer: 'University of Pennsylvania',
+    date: '2025',
+    description:
+      'Course focused on Java fundamentals and object-oriented programming concepts including classes, inheritance, polymorphism, and software development best practices.',
+    skills: [
+      'Java',
+      'Object-Oriented Programming',
+      'Classes & Objects',
+      'Inheritance',
+      'Polymorphism',
+      'Software Development',
+    ],
+    preview: {
+      title: 'Java & OOP',
+      imagePath: 'certifications/java.jpg',
+    },
   },
-},
-
   {
     id: 'ibm-csa',
-    title: 'Cybersecurity Compliance Frameworks, Standards & Regulations (2025)',
+    title: 'Cybersecurity Compliance Frameworks, Standards & Regulations',
     issuer: 'IBM',
     date: '2025',
     description:
@@ -87,8 +92,42 @@ export const CERTIFICATIONS: Certification[] = [
     },
   },
   {
+    id: 'spring-cloud-microservices',
+    title: 'Advanced Spring Cloud Microservices & Deployment with Docker',
+    issuer: 'Packt',
+    date: '2025',
+    description:
+      'Advanced course covering Spring Cloud microservices architecture, containerization with Docker, service communication, deployment strategies, and scalable backend systems.',
+    skills: [
+      'Spring Boot',
+      'Spring Cloud',
+      'Microservices',
+      'Docker',
+      'REST APIs',
+      'Backend Development',
+      'Deployment',
+    ],
+    preview: {
+      title: 'Spring Microservices',
+      imagePath: 'certifications/ms.jpg',
+    },
+  },
+  {
+    id: 'ibm-containers',
+    title: 'Introduction to Containers w/ Docker, Kubernetes & OpenShift',
+    issuer: 'IBM',
+    date: '2025',
+    description:
+      'Course covering containerization fundamentals, Docker, Kubernetes orchestration, and Red Hat OpenShift deployment concepts.',
+    skills: ['Docker', 'Kubernetes', 'OpenShift', 'Containers', 'DevOps', 'Cloud Computing'],
+    preview: {
+      title: 'Containers & Kubernetes',
+      imagePath: 'certifications/containers.jpg',
+    },
+  },
+  {
     id: 'unix-workbench',
-    title: 'The Unix Workbench (2024)',
+    title: 'The Unix Workbench',
     issuer: 'Johns Hopkins University',
     date: '2024',
     description:
@@ -99,73 +138,36 @@ export const CERTIFICATIONS: Certification[] = [
       imagePath: 'certifications/unix.jpg',
     },
   },
-
   {
-  id: 'spring-cloud-microservices',
-  title: 'Advanced Spring Cloud Microservices & Deployment with Docker',
-  issuer: 'Packt',
-  date: '2025',
-  description:
-    'Advanced course covering Spring Cloud microservices architecture, containerization with Docker, service communication, deployment strategies, and scalable backend systems.',
-  skills: [
-    'Spring Boot',
-    'Spring Cloud',
-    'Microservices',
-    'Docker',
-    'REST APIs',
-    'Backend Development',
-    'Deployment',
-  ],
-  preview: {
-    title: 'Spring Microservices',
-    imagePath: 'certifications/ms.jpg',
+    id: 'hkust-se-design',
+    title: 'Software Engineering: Design & Project Management',
+    issuer: 'Hong Kong University of Science and Technology',
+    date: '2024',
+    description:
+      'Course on software design principles, architectural patterns, and project management practices across the software development lifecycle.',
+    skills: [
+      'Software Design',
+      'Design Patterns',
+      'Software Architecture',
+      'Project Management',
+      'SDLC',
+    ],
+    preview: {
+      title: 'Software Design & PM',
+      imagePath: 'certifications/sd.jpg',
+    },
   },
-},
-
-
   {
-  id: 'ibm-containers',
-  title: 'Introduction to Containers w/ Docker, Kubernetes & OpenShift',
-  issuer: 'IBM',
-  date: '2025',
-  description:
-    'Course covering containerization fundamentals, Docker, Kubernetes orchestration, and Red Hat OpenShift deployment concepts.',
-  skills: [
-    'Docker',
-    'Kubernetes',
-    'OpenShift',
-    'Containers',
-    'DevOps',
-    'Cloud Computing',
-  ],
-  preview: {
-    title: 'Containers & Kubernetes',
-    imagePath: 'certifications/containers.jpg',
+    id: 'ibm-agility',
+    title: 'Delivering Quality Work with Agility',
+    issuer: 'IBM',
+    date: '2024',
+    description:
+      'Professional development course on Agile methodologies, Scrum practices, and delivering value in iterative environments.',
+    skills: ['Agile', 'Scrum', 'Project Management', 'Team Collaboration', 'Quality Assurance'],
+    preview: {
+      title: 'Agile Delivery',
+      imagePath: 'certifications/agile.jpg',
+    },
   },
-},
-{
-  id: 'ibm-agility',
-  title: 'Delivering Quality Work with Agility',
-  issuer: 'IBM',
-  date: '2024',
-  description:
-    'Professional development course on Agile methodologies, Scrum practices, and delivering value in iterative environments.',
-  skills: [
-    'Agile',
-    'Scrum',
-    'Project Management',
-    'Team Collaboration',
-    'Quality Assurance',
-  ],
-  preview: {
-    title: 'Agile Delivery',
-    imagePath: 'certifications/agile.jpg',
-  },
-},
-
-  
 ];
-
-export function getCertificationById(id: string): Certification | undefined {
-  return CERTIFICATIONS.find((c) => c.id === id);
-}

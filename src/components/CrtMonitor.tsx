@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 
 function LogoutIcon({ className }: { className?: string }) {
@@ -69,29 +69,16 @@ export const CrtMonitor = ({
   onToggleTypingSound,
 }: CrtMonitorProps) => {
   const reduceMotion = usePrefersReducedMotion();
-  const [warmingUp, setWarmingUp] = useState(false);
-  const prevPowered = useRef<boolean | undefined>(undefined);
   const prevPoweredForSound = useRef<boolean | undefined>(undefined);
   const crtAudioRef = useRef<AudioContext | null>(null);
 
-  useEffect(() => {
-    const prev = prevPowered.current;
-    prevPowered.current = powered;
-
-    if (reduceMotion) {
-      setWarmingUp(false);
-      return;
-    }
-    if (prev === undefined) return;
-
-    if (!prev && powered) {
-      setWarmingUp(true);
-      const id = window.setTimeout(() => setWarmingUp(false), 940);
-      return () => clearTimeout(id);
-    }
-    if (!powered) setWarmingUp(false);
-    return undefined;
-  }, [powered, reduceMotion]);
+  /**
+   * Le réchauffage des phosphores est piloté par CSS : `.crt-warmup` porte une animation
+   * `forwards` de 0,94 s, rejouée chaque fois que la classe est réappliquée — donc à chaque
+   * passage OFF → ON. La media query `prefers-reduced-motion` la neutralise déjà côté CSS.
+   * Aucun état React à synchroniser : la valeur se dérive du rendu.
+   */
+  const warmingUp = powered && !reduceMotion;
 
   useEffect(() => {
     const prev = prevPoweredForSound.current;

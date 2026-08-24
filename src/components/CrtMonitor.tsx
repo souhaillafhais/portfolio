@@ -45,18 +45,25 @@ function CVIcon({ className }: { className?: string }) {
 interface CrtMonitorProps {
   children: ReactNode;
   powered: boolean;
-  onTogglePower: () => void;
+  /** Absent au login : l’interrupteur disparaît, l’écran reste allumé. */
+  onTogglePower?: () => void;
   /** Retour à l’écran de connexion. */
-  onLogout?: () => void;  /** Basculer vers la vue CV. */
-  onSwitchToCv?: () => void;  /** Pendant la séquence de déconnexion : désactive interrupteur et logout. */
+  onLogout?: () => void;
+  /** Basculer vers la vue CV. */
+  onSwitchToCv?: () => void;
+  /** Pendant la séquence de déconnexion : désactive interrupteur et logout. */
   controlsLocked?: boolean;
   typingSoundEnabled?: boolean;
   onToggleTypingSound?: () => void;
 }
 
 /**
- * Écran façon ancien CRT : scanlines / vignette, extinction (ligne vidéo, NO SIGNAL),
- * réchauffage phosphores à l’allumage, interrupteur sous le cadre (aligné sur le thème).
+ * Moniteur CRT des années 90 occupant tout le viewport : coque plastique, tube bombé et
+ * mentonnière portant les commandes physiques.
+ *
+ * La courbure est suggérée — rayon proportionnel, vignettage d’angle, reflet de verre — et
+ * non appliquée au contenu : une vraie distorsion (feDisplacementMap ou WebGL) rendrait le
+ * texte flou et décalerait les clics.
  */
 export const CrtMonitor = ({
   children,
@@ -76,7 +83,6 @@ export const CrtMonitor = ({
    * Le réchauffage des phosphores est piloté par CSS : `.crt-warmup` porte une animation
    * `forwards` de 0,94 s, rejouée chaque fois que la classe est réappliquée — donc à chaque
    * passage OFF → ON. La media query `prefers-reduced-motion` la neutralise déjà côté CSS.
-   * Aucun état React à synchroniser : la valeur se dérive du rendu.
    */
   const warmingUp = powered && !reduceMotion;
 
@@ -113,172 +119,217 @@ export const CrtMonitor = ({
     osc.stop(ctx.currentTime + 0.28);
   }, [powered]);
 
-  const heightViewport =
-    'h-[clamp(236px,min(52dvh,92vw),min(480px,58dvh))] sm:h-[clamp(260px,min(50dvh,85vw),min(480px,56dvh))]';
-
-  const controlRail =
-    'rounded-md border border-terminal-border bg-terminal-header/90 shadow-[inset_0_1px_0_rgb(255_255_255/0.06),0_6px_14px_-6px_rgb(0_0_0/0.35)] backdrop-blur-sm';
+  const chinButton =
+    'flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md border border-white/10 bg-black/25 text-terminal-muted shadow-[inset_0_1px_0_rgb(255_255_255/0.07)] transition-colors hover:bg-black/40 hover:text-terminal-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terminal-accent active:opacity-95 disabled:cursor-not-allowed disabled:opacity-45';
 
   return (
-    <div className="mx-auto w-full max-w-[min(100%,min(42rem,calc(100vw-2rem)))] shrink-0 px-1 sm:px-0">
-      <div className="flex flex-col gap-2 sm:gap-2.5">
-        <div className="relative overflow-hidden rounded-lg border border-terminal-border/80 bg-black shadow-[0_24px_50px_-12px_rgb(0_0_0/0.55),inset_0_0_0_1px_rgb(255_255_255/0.04)]">
-          <div
-            className={`pointer-events-none absolute inset-0 z-[12] rounded-lg transition-opacity duration-500 ${powered ? 'opacity-[0.065]' : 'opacity-[0.16]'}`}
-            style={{
-              backgroundImage:
-                'repeating-linear-gradient(180deg, transparent 0px, rgb(0 0 0) 1px, transparent 2px, transparent 3px)',
-            }}
-            aria-hidden
-          />
-
-          <div
-            className="pointer-events-none absolute inset-0 z-[13] rounded-lg transition-[box-shadow] duration-500"
-            style={{
-              boxShadow: powered ? 'inset 0 0 56px rgb(0 0 0 / 0.55)' : 'inset 0 0 88px rgb(0 0 0 / 0.94)',
-            }}
-            aria-hidden
-          />
-
-          {/* Contenu tube */}
-          <div
-            className={`relative z-[14] flex ${heightViewport} w-full flex-col overflow-hidden rounded-[inherit] transition-[opacity,filter,transform] duration-[400ms] ease-[cubic-bezier(0.4,0.15,0.2,1)] ${warmingUp ? 'crt-warmup' : ''} ${powered ? '' : 'pointer-events-none'}`}
-            style={{
-              opacity: powered ? 1 : 0,
-              transformOrigin: '50% 50%',
-              transform: powered ? 'scaleY(1)' : 'scaleY(0.04)',
-              ...(warmingUp ? {} : { filter: powered ? 'brightness(1)' : 'brightness(0)' }),
-            }}
-            aria-hidden={!powered}
-          >
-            <div
-              className="relative h-full w-full overflow-hidden rounded-[inherit]"
-              inert={!powered || undefined}
-            >
-              {children}
-            </div>
+    <div
+      className="crt-shell fixed inset-0 z-0 flex flex-col overflow-hidden"
+      style={{
+        paddingTop: 'calc(var(--crt-bezel) + env(safe-area-inset-top, 0px))',
+        paddingLeft: 'calc(var(--crt-bezel) + env(safe-area-inset-left, 0px))',
+        paddingRight: 'calc(var(--crt-bezel) + env(safe-area-inset-right, 0px))',
+      }}
+    >
+      <div className="crt-tube relative z-10 min-h-0 flex-1 overflow-hidden bg-black">
+        {/* Tube : contenu */}
+        <div
+          className={`relative z-[14] h-full w-full overflow-hidden rounded-[inherit] transition-[opacity,transform] duration-[400ms] ease-[cubic-bezier(0.4,0.15,0.2,1)] ${
+            warmingUp ? 'crt-warmup' : ''
+          } ${powered ? '' : 'pointer-events-none'}`}
+          style={{
+            opacity: powered ? 1 : 0,
+            transformOrigin: '50% 50%',
+            transform: powered ? 'scaleY(1)' : 'scaleY(0.04)',
+            ...(warmingUp ? {} : { filter: powered ? 'brightness(1)' : 'brightness(0)' }),
+          }}
+          aria-hidden={!powered}
+        >
+          <div className="relative h-full w-full overflow-hidden" inert={!powered || undefined}>
+            {children}
           </div>
-
-          {!powered && (
-            <div
-              className={`pointer-events-none absolute inset-0 z-[17] rounded-lg bg-[#030304] ${reduceMotion ? '' : 'crt-flyback-mask'}`}
-              aria-hidden
-            />
-          )}
-
-          {!powered && (
-            <div className="pointer-events-none absolute inset-0 z-[21] flex flex-col items-center justify-center gap-2 font-mono text-center">
-              <p
-                className="crt-standby-blink text-[11px] tracking-[0.42em]"
-                style={{ color: 'rgba(251, 191, 72, 0.82)' }}
-              >
-                NO SIGNAL
-              </p>
-              <p className="text-[10px] tracking-widest" style={{ color: 'rgba(251, 191, 72, 0.35)' }}>
-                — POWER —
-              </p>
-            </div>
-          )}
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 px-1 sm:gap-x-4 sm:px-2">
-          {onToggleTypingSound ? (
-            <div className={`flex items-center ${controlRail} p-px`}>
-              <button
-                type="button"
-                disabled={controlsLocked}
-                onClick={() => {
-                  if (!controlsLocked) onToggleTypingSound();
-                }}
-                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-[5px] text-terminal-muted transition-colors hover:bg-terminal-surface/90 hover:text-terminal-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terminal-accent active:opacity-95 disabled:cursor-not-allowed disabled:opacity-45"
-                aria-label={
-                  typingSoundEnabled
-                    ? 'Désactiver le son de frappe clavier'
-                    : 'Activer le son de frappe clavier'
-                }
-                title={typingSoundEnabled ? 'Son clavier activé' : 'Son clavier désactivé'}
-              >
-                <span className="pointer-events-none text-[18px] leading-none sm:text-[19px]" aria-hidden>
-                  {typingSoundEnabled ? '🔊' : '🔇'}
-                </span>
-              </button>
-            </div>
-          ) : null}
+        {/* Couches optiques — ordre : phosphore → grille → grain → vignettage → verre → scintillement */}
+        <div
+          className={`crt-scanlines pointer-events-none absolute inset-0 z-[16] rounded-[inherit] transition-opacity duration-500 ${
+            powered ? 'opacity-[0.55]' : 'opacity-90'
+          }`}
+          aria-hidden
+        />
+        <div
+          className="crt-grille pointer-events-none absolute inset-0 z-[16] rounded-[inherit] opacity-70"
+          aria-hidden
+        />
+        <div
+          className="crt-grain pointer-events-none absolute inset-[-4%] z-[17] opacity-[0.055] mix-blend-overlay"
+          aria-hidden
+        />
+        <div
+          className="crt-vignette pointer-events-none absolute inset-0 z-[18] rounded-[inherit]"
+          aria-hidden
+        />
+        <div
+          className="crt-glass pointer-events-none absolute inset-0 z-[19] rounded-[inherit]"
+          aria-hidden
+        />
+        {powered && (
+          <div
+            className="crt-flicker pointer-events-none absolute inset-0 z-[20] rounded-[inherit]"
+            aria-hidden
+          />
+        )}
 
-          <div className={`flex items-center px-2.5 py-1.5 sm:px-3 sm:py-2 ${controlRail}`}>
+        {!powered && (
+          <div
+            className={`pointer-events-none absolute inset-0 z-[21] rounded-[inherit] bg-[#030304] ${
+              reduceMotion ? '' : 'crt-flyback-mask'
+            }`}
+            aria-hidden
+          />
+        )}
+
+        {!powered && (
+          <div className="pointer-events-none absolute inset-0 z-[22] flex flex-col items-center justify-center gap-2 text-center font-mono">
+            <p
+              className="crt-standby-blink text-[11px] tracking-[0.42em]"
+              style={{ color: 'rgba(251, 191, 72, 0.82)' }}
+            >
+              NO SIGNAL
+            </p>
+            <p className="text-[10px] tracking-widest" style={{ color: 'rgba(251, 191, 72, 0.35)' }}>
+              — POWER —
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Mentonnière : plaque de marque, LED et commandes physiques */}
+      <div
+        className="relative z-10 flex shrink-0 items-center justify-between gap-3 px-1 sm:px-3"
+        style={{
+          height: 'var(--crt-chin)',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        }}
+      >
+        <div className="flex min-w-0 items-center gap-3">
+          <span
+            className="hidden select-none font-mono text-[10px] font-bold uppercase tracking-[0.34em] text-white/25 sm:inline"
+            aria-hidden
+          >
+            Portfolio&nbsp;Shell
+          </span>
+          <span
+            className="hidden select-none font-mono text-[9px] uppercase tracking-[0.2em] text-white/15 md:inline"
+            aria-hidden
+          >
+            PS&#8209;1700&nbsp;SVGA
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          {onToggleTypingSound ? (
             <button
               type="button"
               disabled={controlsLocked}
               onClick={() => {
-                if (!controlsLocked) onTogglePower();
+                if (!controlsLocked) onToggleTypingSound();
               }}
-              aria-pressed={powered}
+              className={chinButton}
               aria-label={
-                powered ? 'Écran allumé · cliquer pour éteindre' : 'Écran éteint · cliquer pour allumer'
+                typingSoundEnabled
+                  ? 'Désactiver le son de frappe clavier'
+                  : 'Activer le son de frappe clavier'
               }
-              className="flex min-h-[44px] shrink-0 items-center justify-center gap-2 px-2 sm:gap-2.5 disabled:cursor-not-allowed disabled:opacity-45"
+              title={typingSoundEnabled ? 'Son clavier activé' : 'Son clavier désactivé'}
             >
-              <span className="hidden font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-terminal-muted sm:inline">
-                Monitor
-              </span>
-              <span className="relative h-[31px] w-[52px] shrink-0 rounded-full border border-terminal-border bg-terminal-bg p-[3px] shadow-[inset_0_3px_6px_rgb(0_0_0/0.55)]">
-                <span
-                  className="absolute inset-y-[3px] rounded-full shadow-[0_3px_6px_rgb(0_0_0/0.45)] transition-[left,background] duration-[320ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
-                  style={{
-                    width: '22px',
-                    left: powered ? 'calc(100% - 25px)' : '3px',
-                    background: powered
-                      ? 'linear-gradient(185deg,color-mix(in srgb,var(--term-accent) 92%,white),color-mix(in srgb,var(--term-accent) 55%,#064e3b))'
-                      : 'linear-gradient(185deg,color-mix(in srgb,var(--term-dim) 70%,#7f1d1d),#450a0a)',
-                  }}
-                  aria-hidden
-                />
-              </span>
-              <span
-                className={`inline-flex h-[22px] w-8 shrink-0 items-center justify-center rounded border font-mono text-[9px] font-bold uppercase tabular-nums tracking-wider shadow-inner ring-1 ${
-                  powered
-                    ? 'border-terminal-accent/45 bg-terminal-surface text-terminal-accent ring-terminal-accent/25'
-                    : 'border-terminal-border bg-terminal-bg text-terminal-dim ring-terminal-border/50'
-                }`}
-              >
-                {powered ? 'ON' : 'OFF'}
+              <span className="pointer-events-none text-[17px] leading-none" aria-hidden>
+                {typingSoundEnabled ? '🔊' : '🔇'}
               </span>
             </button>
-          </div>
-
-          {onLogout ? (
-            <div className={`flex items-center ${controlRail} p-px`}>
-              <button
-                type="button"
-                disabled={controlsLocked}
-                onClick={() => {
-                  if (!controlsLocked) onLogout();
-                }}
-                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-[5px] text-terminal-muted transition-colors hover:bg-terminal-surface/90 hover:text-terminal-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terminal-accent active:opacity-95 disabled:cursor-not-allowed disabled:opacity-45"
-                aria-label="Se déconnecter — nouvelle question à la prochaine connexion"
-                title="Déconnexion"
-              >
-                <LogoutIcon className="pointer-events-none h-[18px] w-[18px] sm:h-5 sm:w-5" />
-              </button>
-            </div>
           ) : null}
 
           {onSwitchToCv ? (
-            <div className={`flex items-center ${controlRail} p-px`}>
+            <button
+              type="button"
+              disabled={controlsLocked}
+              onClick={() => {
+                if (!controlsLocked) onSwitchToCv();
+              }}
+              className={chinButton}
+              aria-label="Voir le CV interactif"
+              title="Vue CV"
+            >
+              <CVIcon className="pointer-events-none h-[18px] w-[18px]" />
+            </button>
+          ) : null}
+
+          {onLogout ? (
+            <button
+              type="button"
+              disabled={controlsLocked}
+              onClick={() => {
+                if (!controlsLocked) onLogout();
+              }}
+              className={chinButton}
+              aria-label="Se déconnecter — nouvelle question à la prochaine connexion"
+              title="Déconnexion"
+            >
+              <LogoutIcon className="pointer-events-none h-[18px] w-[18px]" />
+            </button>
+          ) : null}
+
+          {/* Interrupteur d’alimentation + LED, groupés comme sur la façade d’origine */}
+          <div className={`ml-1 flex items-center gap-2.5 sm:ml-2 ${onTogglePower ? '' : 'pr-1'}`}>
+            <span
+              className={`h-[7px] w-[7px] shrink-0 rounded-full transition-colors duration-300 ${
+                powered ? 'crt-led-on' : ''
+              }`}
+              style={{
+                background: powered ? 'var(--term-accent)' : 'rgb(120 20 20)',
+                boxShadow: powered
+                  ? '0 0 7px 1px color-mix(in srgb, var(--term-accent) 70%, transparent)'
+                  : 'inset 0 1px 2px rgb(0 0 0 / 0.7)',
+              }}
+              aria-hidden
+            />
+            {onTogglePower ? (
               <button
                 type="button"
                 disabled={controlsLocked}
                 onClick={() => {
-                  if (!controlsLocked) onSwitchToCv();
+                  if (!controlsLocked) onTogglePower();
                 }}
-                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-[5px] text-terminal-muted transition-colors hover:bg-terminal-surface/90 hover:text-terminal-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terminal-accent active:opacity-95 disabled:cursor-not-allowed disabled:opacity-45"
-                aria-label="Voir le CV interactif"
-                title="Vue CV"
+                aria-pressed={powered}
+                aria-label={
+                  powered
+                    ? 'Écran allumé · cliquer pour éteindre'
+                    : 'Écran éteint · cliquer pour allumer'
+                }
+                className="flex min-h-[44px] shrink-0 items-center justify-center gap-2 rounded-md px-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terminal-accent disabled:cursor-not-allowed disabled:opacity-45"
               >
-                <CVIcon className="pointer-events-none h-[18px] w-[18px] sm:h-5 sm:w-5" />
+                <span
+                  className="hidden font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-white/30 sm:inline"
+                  aria-hidden
+                >
+                  Power
+                </span>
+                <span className="relative h-[28px] w-[48px] shrink-0 rounded-full border border-black/60 bg-black/50 p-[3px] shadow-[inset_0_3px_6px_rgb(0_0_0/0.65)]">
+                  <span
+                    className="absolute inset-y-[3px] rounded-full shadow-[0_3px_6px_rgb(0_0_0/0.5)] transition-[left,background] duration-[320ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
+                    style={{
+                      width: '20px',
+                      left: powered ? 'calc(100% - 23px)' : '3px',
+                      background: powered
+                        ? 'linear-gradient(185deg,color-mix(in srgb,var(--term-accent) 92%,white),color-mix(in srgb,var(--term-accent) 55%,#064e3b))'
+                        : 'linear-gradient(185deg,#8a8a92,#3a3a41)',
+                    }}
+                    aria-hidden
+                  />
+                </span>
               </button>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
         </div>
       </div>
     </div>

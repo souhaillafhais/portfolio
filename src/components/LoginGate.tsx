@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
+import { CrtMonitor } from './CrtMonitor';
+import { CodeBackdrop } from './CodeBackdrop';
 import {
   isAnswerCorrect,
   pickRandomQuestion,
@@ -12,7 +14,9 @@ interface LoginGateProps {
   lastQuestionIdKey: string;
 }
 
-/** Page login épurée : photo en haut de la zone de question, mot de passe, bouton — sans carte ni cadre. */
+const LOGIN_USER = 'visitor';
+
+/** Session TTY sur le tube CRT : bannière noyau, invite de login, question de sécurité. */
 export const LoginGate = ({ onPassed, lastQuestionIdKey, gateSession }: LoginGateProps) => {
   const reduceMotion = usePrefersReducedMotion();
   const question = useMemo<SecurityQuestion>(() => {
@@ -34,6 +38,7 @@ export const LoginGate = ({ onPassed, lastQuestionIdKey, gateSession }: LoginGat
   }, [lastQuestionIdKey, gateSession]);
   const [value, setValue] = useState('');
   const [hint, setHint] = useState<string | null>(null);
+  const [failures, setFailures] = useState(0);
   const [authenticating, setAuthenticating] = useState(false);
 
   useEffect(() => {
@@ -52,6 +57,7 @@ export const LoginGate = ({ onPassed, lastQuestionIdKey, gateSession }: LoginGat
       setAuthenticating(true);
       return;
     }
+    setFailures((n) => n + 1);
     setHint(question.hint);
   };
 
@@ -61,84 +67,91 @@ export const LoginGate = ({ onPassed, lastQuestionIdKey, gateSession }: LoginGat
   };
 
   return (
-    <div
-      className="portfolio-login-enter relative z-[40] flex min-h-svh flex-col items-center justify-center bg-terminal-bg px-6 py-10 font-[system-ui,'Segoe_UI',Roboto,'Helvetica_Neue',sans-serif]"
-      style={{
-        paddingLeft: 'max(1.5rem, env(safe-area-inset-left))',
-        paddingRight: 'max(1.5rem, env(safe-area-inset-right))',
-        paddingTop: 'max(1.5rem, env(safe-area-inset-top))',
-        paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))',
-      }}
-    >
-      <div
-        className={`flex w-full max-w-[22rem] flex-col items-center ${authenticating ? 'pointer-events-none' : ''}`}
-        aria-busy={authenticating}
-      >
-        {/* Réserve la place du portrait, rendu en position fixed par <PortraitLayer />. */}
-        <div className="mb-8 mt-20" aria-hidden />
+    <div className="portfolio-login-enter fixed inset-0 z-[40]">
+      <CrtMonitor powered>
+        <div className="relative flex h-full w-full flex-col overflow-hidden bg-terminal-bg px-[clamp(1rem,3.6vw,3.25rem)] pb-[clamp(0.75rem,2.4vh,1.75rem)] pt-[clamp(0.75rem,2.6vh,2rem)]">
+          <CodeBackdrop />
 
-        <p
-          className={`w-full text-center text-sm leading-relaxed text-terminal-dim transition-opacity duration-300 ${authenticating ? 'pointer-events-none opacity-35' : ''}`}
-        >
-          {question.question}
-        </p>
+          <div className="terminal-scroll-area relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto font-mono text-[0.8125rem] leading-relaxed text-terminal-text sm:text-sm">
+            {/* Bannière noyau — décor, cohérent avec la commande `specs` */}
+            <pre className="whitespace-pre-wrap text-terminal-dim" aria-hidden>
+              {`Portfolio Linux 1.0 (demo)  tty1
+Kernel 6.8.0-portfolio on x86_64
+`}
+            </pre>
 
-        <form
-          onSubmit={onSubmit}
-          className={`mt-8 w-full space-y-4 transition-opacity duration-300 ${authenticating ? 'opacity-90' : ''}`}
-        >
-          <label className="sr-only" htmlFor="gate-password">
-            Password — your answer to the question above
-          </label>
-          <input
-            id="gate-password"
-            type="password"
-            autoComplete="off"
-            autoCapitalize="off"
-            spellCheck={false}
-            value={value}
-            disabled={authenticating}
-            onChange={(e) => {
-              setValue(e.target.value);
-              setHint(null);
-            }}
-            className="h-11 w-full min-w-0 rounded-md bg-terminal-bg/40 px-3.5 text-[15px] text-terminal-text outline-none ring-1 ring-terminal-border/60 transition placeholder:text-terminal-muted/65 focus:bg-terminal-bg/60 focus:ring-terminal-accent/40 disabled:cursor-not-allowed disabled:opacity-70"
-            placeholder="Password"
-            aria-describedby={hint ? 'gate-hint' : 'gate-helper'}
-            autoFocus={!authenticating}
-          />
-
-          <p id="gate-helper" className="hidden" aria-live="polite">
-            Wrong answers show an optional hint.
-          </p>
-
-          {hint && !authenticating && (
-            <p id="gate-hint" className="text-center text-sm text-amber-500/95" role="status">
-              Hint: {hint}
+            <p className="mt-4 text-terminal-text">
+              <span className="text-terminal-dim">portfolio</span> login:{' '}
+              <span className="text-terminal-accent">{LOGIN_USER}</span>
             </p>
-          )}
 
-          <button
-            type="submit"
-            disabled={authenticating || !value.trim()}
-            className="flex h-11 w-full items-center justify-center gap-2.5 rounded-md bg-terminal-accent/15 text-sm font-semibold text-terminal-accent transition hover:bg-terminal-accent/22 active:opacity-95 disabled:pointer-events-none disabled:opacity-50"
-            aria-label={authenticating ? 'Connexion en cours' : 'Sign in'}
-          >
-            {authenticating ? (
-              <>
-                <span
-                  className={`inline-block h-[1.125rem] w-[1.125rem] shrink-0 rounded-full border-2 border-terminal-accent/35 border-t-terminal-accent ${reduceMotion ? '' : 'animate-spin'}`}
-                  aria-hidden
+            <p className="mt-4 max-w-[62ch] text-terminal-text">
+              <span className="text-terminal-muted">Security question —</span> {question.question}
+            </p>
+
+            <form onSubmit={onSubmit} className="mt-3 max-w-[62ch]">
+              <label className="sr-only" htmlFor="gate-password">
+                Password — your answer to the question above
+              </label>
+
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span className="shrink-0 select-none text-terminal-text" aria-hidden>
+                  Password:
+                </span>
+                <input
+                  id="gate-password"
+                  type="password"
+                  autoComplete="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  value={value}
+                  disabled={authenticating}
+                  onChange={(e) => {
+                    setValue(e.target.value);
+                    setHint(null);
+                  }}
+                  className="min-w-0 flex-1 bg-transparent font-mono text-[0.8125rem] tracking-[0.25em] text-terminal-accent caret-transparent outline-none disabled:opacity-60 sm:text-sm"
+                  aria-describedby={hint ? 'gate-hint' : 'gate-helper'}
+                  autoFocus={!authenticating}
                 />
-                <span>Signing in…</span>
-                <span className="sr-only">Chargement</span>
-              </>
-            ) : (
-              'Sign in'
-            )}
-          </button>
-        </form>
-      </div>
+                {!authenticating && (
+                  <span
+                    className="terminal-cursor-blink pointer-events-none -ml-1 inline-block h-4 w-2 shrink-0 rounded-sm bg-terminal-accent"
+                    aria-hidden
+                  />
+                )}
+              </div>
+
+              <p id="gate-helper" className="sr-only">
+                Press Enter to sign in. A wrong answer prints a hint.
+              </p>
+
+              {hint && !authenticating && (
+                <p id="gate-hint" className="mt-3 text-amber-400/95" role="status">
+                  <span className="text-rose-400">Login incorrect</span>
+                  {failures > 1 ? ` (${failures} attempts)` : ''} — hint: {hint}
+                </p>
+              )}
+
+              {authenticating && (
+                <p className="mt-3 text-terminal-dim" role="status">
+                  Authenticating<span aria-hidden>…</span> starting workstation session
+                  <span className="sr-only">, please wait</span>
+                </p>
+              )}
+
+              {/* Bouton conservé pour le tactile et le clavier ; Entrée fait la même chose. */}
+              <button
+                type="submit"
+                disabled={authenticating || !value.trim()}
+                className="mt-5 rounded border border-terminal-border px-3 py-1.5 font-mono text-xs uppercase tracking-[0.18em] text-terminal-accent transition hover:border-terminal-accent/60 hover:bg-terminal-accent/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terminal-accent disabled:pointer-events-none disabled:opacity-40"
+              >
+                {authenticating ? 'Signing in…' : 'Enter ⏎'}
+              </button>
+            </form>
+          </div>
+        </div>
+      </CrtMonitor>
     </div>
   );
 };

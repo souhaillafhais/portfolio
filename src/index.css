@@ -660,3 +660,176 @@ html[data-portfolio-theme='oceanic'] {
 .crt-flyback-mask {
   animation: crt-flyback-scan 0.45s ease-out forwards;
 }
+
+/* ─── Moniteur CRT plein écran : cadre, tube bombé, verre, grille, grain ──── */
+
+:root {
+  /* Épaisseur du cadre plastique — partagée avec PortraitLayer pour le portrait docké. */
+  --crt-bezel: clamp(9px, 1.9vw, 28px);
+  /* Mentonnière : accueille les commandes, min 56px pour des cibles tactiles de 44px. */
+  --crt-chin: clamp(56px, 9vh, 78px);
+  /*
+   * Rayon du tube exprimé en pourcentage : l’horizontal suit la largeur et le vertical la
+   * hauteur, donc les angles restent proportionnés quel que soit le ratio de la fenêtre —
+   * exactement le comportement d’un vrai tube.
+   */
+  --crt-radius: 4.5% / 6.5%;
+}
+
+/* Coque plastique. Les teintes dérivent du thème pour rester cohérentes sur les 15 palettes. */
+.crt-shell {
+  background:
+    linear-gradient(
+      171deg,
+      color-mix(in srgb, var(--term-header) 55%, #0b0b0e),
+      color-mix(in srgb, var(--term-bg) 62%, #08080a) 44%,
+      color-mix(in srgb, var(--term-header) 42%, #131317)
+    );
+}
+
+/* Léger grain moulé sur le plastique du cadre. */
+.crt-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: radial-gradient(rgb(255 255 255 / 0.028) 0.5px, transparent 0.5px);
+  background-size: 3px 3px;
+}
+
+.crt-tube {
+  border-radius: var(--crt-radius);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.05),
+    inset 0 1px 0 rgb(255 255 255 / 0.06),
+    0 0 0 1px rgb(0 0 0 / 0.92),
+    0 24px 64px -22px rgb(0 0 0 / 0.85);
+}
+
+/* Lignes de balayage horizontales. */
+.crt-scanlines {
+  background-image: repeating-linear-gradient(
+    180deg,
+    rgb(0 0 0 / 0.5) 0 1px,
+    transparent 1px 3px
+  );
+}
+
+/* Grille d’ouverture : triade RVB verticale, très discrète pour ne pas troubler le texte. */
+.crt-grille {
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgb(255 32 32 / 0.06) 0 1px,
+    rgb(32 255 32 / 0.06) 1px 2px,
+    rgb(32 32 255 / 0.06) 2px 3px
+  );
+}
+
+/*
+ * Vignettage bien plus marqué dans les angles que sur les bords : c’est ce dégradé, plus que
+ * le rayon, qui donne la sensation de surface bombée sans déformer le contenu.
+ */
+.crt-vignette {
+  background: radial-gradient(
+    118% 108% at 50% 50%,
+    transparent 44%,
+    rgb(0 0 0 / 0.3) 74%,
+    rgb(0 0 0 / 0.72) 100%
+  );
+}
+
+/* Reflet de verre : source large en haut à gauche, rebond ambiant en bas à droite. */
+.crt-glass {
+  background:
+    radial-gradient(
+      128% 88% at 26% 4%,
+      rgb(255 255 255 / 0.09),
+      rgb(255 255 255 / 0.022) 36%,
+      transparent 62%
+    ),
+    radial-gradient(62% 42% at 86% 96%, rgb(255 255 255 / 0.04), transparent 64%);
+}
+
+.crt-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: crt-grain-jitter 700ms steps(3) infinite;
+}
+
+@keyframes crt-grain-jitter {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  33% {
+    transform: translate3d(-2%, 1%, 0);
+  }
+  66% {
+    transform: translate3d(1%, -2%, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/*
+ * Scintillement du voile plutôt que du contenu : animer l’opacité d’un calque noir évite de
+ * créer un contexte d’empilement sur le texte, qui perdrait en netteté.
+ */
+@keyframes crt-flicker-veil {
+  0%,
+  6%,
+  10%,
+  30%,
+  34%,
+  71%,
+  75%,
+  100% {
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.5;
+  }
+  32% {
+    opacity: 0.28;
+  }
+  73% {
+    opacity: 0.42;
+  }
+}
+
+.crt-flicker {
+  background: rgb(0 0 0 / 0.07);
+  opacity: 0;
+  animation: crt-flicker-veil 7s ease-in-out infinite;
+}
+
+/* LED d’alimentation sur la mentonnière. */
+@keyframes crt-led-breathe {
+  0%,
+  100% {
+    opacity: 0.82;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.crt-led-on {
+  animation: crt-led-breathe 3.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crt-grain {
+    animation: none;
+  }
+
+  .crt-flicker {
+    animation: none;
+    opacity: 0;
+  }
+
+  .crt-led-on {
+    animation: none;
+    opacity: 1;
+  }
+}

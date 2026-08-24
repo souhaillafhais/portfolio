@@ -73,56 +73,56 @@ export const DeskView = ({ onLogout, onSwitchToCv }: DeskViewProps) => {
 
   return (
     <div
-      className={`relative isolate z-10 flex min-h-svh w-full max-w-[100vw] flex-col overflow-x-hidden bg-terminal-bg motion-reduce:transition-none ${
+      className={`fixed inset-0 z-10 motion-reduce:transition-none ${
         isLoggingOut
           ? 'transition-[opacity,filter,transform] duration-[620ms] ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:duration-200'
           : ''
       } ${deskFadeOut ? 'pointer-events-none scale-[0.985] opacity-0 blur-[2px]' : 'opacity-100'}`}
     >
-      <CodeBackdrop />
+      <CrtMonitor
+        powered={crtPowered}
+        onTogglePower={() => setCrtPowered((v) => !v)}
+        onLogout={beginLogout}
+        onSwitchToCv={onSwitchToCv}
+        controlsLocked={isLoggingOut}
+        typingSoundEnabled={typingSoundEnabled}
+        onToggleTypingSound={() => setTypingSoundEnabled((v) => !v)}
+      >
+        {/*
+         * Contenu du tube. Le rembourrage tient les angles arrondis et le vignettage à
+         * distance du texte, qui serait sinon rogné ou assombri dans les coins.
+         */}
+        <div className="relative flex h-full w-full flex-col overflow-hidden bg-terminal-bg px-[clamp(1rem,3.6vw,3.25rem)] pb-[clamp(0.75rem,2.4vh,1.75rem)] pt-[clamp(0.75rem,2.6vh,2rem)]">
+          <CodeBackdrop />
 
-      <header className="relative z-10 flex w-full justify-center px-[max(1rem,env(safe-area-inset-left))] pb-2 pr-[max(1rem,env(safe-area-inset-right))] pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] text-center sm:px-5 md:pr-[7.75rem] lg:pr-[8.75rem]">
-        <div
-          className={`w-full max-w-[min(100%,48rem)] transition-opacity motion-reduce:transition-none ${
-            showHeader ? 'opacity-100' : 'pointer-events-none select-none opacity-0'
-          } min-h-[7.5rem] duration-700 ease-out sm:min-h-[6.75rem]`}
-          aria-hidden={!showHeader}
-        >
-          {showHeader ? <WorkstationTitleAnimation /> : null}
+          {showHeader ? (
+            <>
+              <header className="relative z-10 flex w-full shrink-0 justify-center pb-2 text-center lg:justify-start">
+                <div className="w-full max-w-[min(100%,48rem)]">
+                  <WorkstationTitleAnimation />
+                </div>
+              </header>
+
+              <div className="relative z-10 flex min-h-0 w-full flex-1 justify-center gap-5 lg:gap-8">
+                <div className="flex min-w-0 flex-1 justify-center">
+                  <Terminal embedded typingSoundEnabled={typingSoundEnabled} />
+                </div>
+
+                <aside
+                  aria-hidden={!shortcutsVisible}
+                  className={`hidden w-[15rem] shrink-0 self-start md:block ${
+                    shortcutsVisible
+                      ? 'translate-x-0 opacity-100'
+                      : 'pointer-events-none translate-x-8 opacity-0'
+                  } transition-[opacity,transform] duration-[650ms] ease-[cubic-bezier(0.25,1,0.45,1)] motion-reduce:transition-none`}
+                >
+                  <CommandShortcuts />
+                </aside>
+              </div>
+            </>
+          ) : null}
         </div>
-      </header>
-
-      <div className="relative z-10 flex min-h-0 w-full flex-1 items-center justify-center px-[max(0.75rem,env(safe-area-inset-left))] py-4 pr-[max(0.75rem,env(safe-area-inset-right))] pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-4 sm:py-6 md:px-5">
-        {showHeader ? (
-          <div className="flex w-full max-w-[min(100%,72rem)] flex-col items-center justify-center gap-6 md:flex-row md:items-start md:justify-center md:gap-8 lg:gap-10">
-            <div className="flex w-full min-w-0 justify-center md:flex-1 md:max-w-[min(100%,42rem)]">
-              <CrtMonitor
-                powered={crtPowered}
-                onTogglePower={() => setCrtPowered((v) => !v)}
-                onLogout={beginLogout}
-                onSwitchToCv={onSwitchToCv}
-                controlsLocked={isLoggingOut}
-                typingSoundEnabled={typingSoundEnabled}
-                onToggleTypingSound={() => setTypingSoundEnabled((v) => !v)}
-              >
-                <Terminal
-                  embedded
-                  typingSoundEnabled={typingSoundEnabled}
-                />
-              </CrtMonitor>
-            </div>
-
-            <aside
-              aria-hidden={!shortcutsVisible}
-              className={`mx-auto w-full min-w-0 max-w-sm shrink-0 md:mx-0 md:w-[min(100%,14.5rem)] md:max-w-none lg:w-[15rem] ${
-                shortcutsVisible ? 'translate-x-0 opacity-100' : 'pointer-events-none translate-x-10 opacity-0 sm:translate-x-8'
-              } transition-[opacity,transform] motion-reduce:transition-none duration-[650ms] ease-[cubic-bezier(0.25,1,0.45,1)]`}
-            >
-              <CommandShortcuts />
-            </aside>
-          </div>
-        ) : null}
-      </div>
+      </CrtMonitor>
     </div>
   );
 };

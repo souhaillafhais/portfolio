@@ -39,13 +39,18 @@ export const PortraitLayer = ({ position }: PortraitLayerProps) => {
     ? ''
     : 'transition-[left,top,width,height,border-radius,border-width,border-color,box-shadow,transform] duration-[5200ms] ease-[cubic-bezier(0.26,1,0.4,1)] will-change-[left,top,width,height,transform]';
 
+  /*
+   * Login et poste de travail partagent le coin haut droit du tube : l’image ne fait que
+   * rétrécir d’une vue à l’autre, sans jamais passer sur le texte de la console.
+   */
   const layoutLogin = [
     'fixed z-[90] overflow-hidden bg-terminal-header shadow-lg',
     'pointer-events-none',
     'rounded-full border border-terminal-border',
-    'h-28 w-28 sm:h-32 sm:w-32 min-h-[7rem] min-w-[7rem]',
-    'top-[calc(env(safe-area-inset-top,0)+5rem)] sm:top-[calc(env(safe-area-inset-top,0)+5.5rem)]',
-    'left-[calc(50vw-3.5rem)] sm:left-[calc(50vw-4rem)]',
+    'h-24 w-24 sm:h-32 sm:w-32',
+    'top-[calc(var(--crt-bezel)+env(safe-area-inset-top,0px)+1.25rem)]',
+    'left-[calc(100vw-var(--crt-bezel)-env(safe-area-inset-right,0px)-7.25rem)]',
+    'sm:left-[calc(100vw-var(--crt-bezel)-env(safe-area-inset-right,0px)-9.5rem)]',
   ].join(' ');
 
   const layoutDocked = [
@@ -53,9 +58,10 @@ export const PortraitLayer = ({ position }: PortraitLayerProps) => {
     'pointer-events-none',
     'rounded-full border border-terminal-accent/50',
     'h-[5.25rem] w-[5.25rem] sm:h-24 sm:w-24',
-    'top-[max(0.75rem,env(safe-area-inset-top))] sm:top-[max(1rem,env(safe-area-inset-top))]',
-    'left-[calc(100vw-max(0.75rem,env(safe-area-inset-right))-5.25rem)]',
-    'sm:left-[calc(100vw-max(1.5rem,env(safe-area-inset-right))-6rem)]',
+    /* Décalé de l’épaisseur du cadre pour se poser dans le tube, pas sur le plastique. */
+    'top-[calc(var(--crt-bezel)+env(safe-area-inset-top,0px)+0.85rem)]',
+    'left-[calc(100vw-var(--crt-bezel)-env(safe-area-inset-right,0px)-6.1rem)]',
+    'sm:left-[calc(100vw-var(--crt-bezel)-env(safe-area-inset-right,0px)-6.9rem)]',
   ].join(' ');
 
   const layout = position === 'login' ? layoutLogin : entered ? layoutDocked : layoutLogin;

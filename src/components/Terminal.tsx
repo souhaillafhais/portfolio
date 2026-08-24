@@ -271,24 +271,24 @@ export const Terminal = ({
     ? 'relative flex h-full min-h-0 w-full flex-col'
     : 'relative flex min-h-svh w-full justify-center px-3 py-4 sm:px-6 sm:py-8 md:items-center md:py-10';
 
+  /* Intégré : le tube CRT fournit déjà cadre, scanlines et vignettage — on reste discret. */
   const innerClass = embedded
-    ? 'relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-sm border border-terminal-border/50 bg-terminal-surface/98 shadow-[inset_0_0_48px_rgb(0,0,0,0.5)]'
+    ? 'relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-md border border-terminal-border/40 bg-terminal-surface/80'
     : 'relative flex h-[min(calc(100dvh-2rem),52rem)] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-terminal-border/70 bg-terminal-surface/95 shadow-[0_0_0_1px_rgb(94_234_212/0.08),0_24px_50px_-12px_rgb(0_0_0/0.72)] backdrop-blur-sm md:h-[min(calc(100dvh-5rem),52rem)]';
-
-  const scanlineRounded = embedded ? 'rounded-sm' : 'rounded-2xl';
 
   return (
     <div className={outerClass}>
       <div className={innerClass} role="region" aria-label="Portfolio terminal">
-        {/* Scanline overlay — subtle CRT feel */}
-        <div
-          className={`pointer-events-none absolute inset-0 opacity-[0.04] ${scanlineRounded}`}
-          style={{
-            backgroundImage:
-              'repeating-linear-gradient(0deg, transparent 0px, rgb(0 0 0) 1px, transparent 2px, transparent 3px)',
-          }}
-          aria-hidden
-        />
+        {!embedded && (
+          <div
+            className="pointer-events-none absolute inset-0 rounded-2xl opacity-[0.04]"
+            style={{
+              backgroundImage:
+                'repeating-linear-gradient(0deg, transparent 0px, rgb(0 0 0) 1px, transparent 2px, transparent 3px)',
+            }}
+            aria-hidden
+          />
+        )}
 
         <header className="relative flex shrink-0 items-center gap-4 border-b border-terminal-border/80 bg-terminal-header/90 px-4 py-3 backdrop-blur-md sm:px-5">
           <div className="flex gap-1.5" aria-hidden>

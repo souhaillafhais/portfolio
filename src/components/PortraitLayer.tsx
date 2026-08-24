@@ -37,11 +37,14 @@ export const PortraitLayer = ({ position }: PortraitLayerProps) => {
 
   const timing = reduceMotion
     ? ''
-    : 'transition-[left,top,width,height,border-radius,border-width,border-color,box-shadow,transform] duration-[5200ms] ease-[cubic-bezier(0.26,1,0.4,1)] will-change-[left,top,width,height,transform]';
+    : 'transition-[right,top,width,height,border-radius,border-width,border-color,box-shadow,transform] duration-[5200ms] ease-[cubic-bezier(0.26,1,0.4,1)] will-change-[right,top,width,height,transform]';
 
   /*
    * Login et poste de travail partagent le coin haut droit du tube : l’image ne fait que
    * rétrécir d’une vue à l’autre, sans jamais passer sur le texte de la console.
+   *
+   * Ancré par `right` et non par `left: calc(100vw - …)` : `100vw` inclut la barre de
+   * défilement, ce qui décalait le portrait sous celle-ci sur desktop.
    */
   const layoutLogin = [
     'fixed z-[90] overflow-hidden bg-terminal-header shadow-lg',
@@ -49,8 +52,7 @@ export const PortraitLayer = ({ position }: PortraitLayerProps) => {
     'rounded-full border border-terminal-border',
     'h-24 w-24 sm:h-32 sm:w-32',
     'top-[calc(var(--crt-bezel)+env(safe-area-inset-top,0px)+1.25rem)]',
-    'left-[calc(100vw-var(--crt-bezel)-env(safe-area-inset-right,0px)-7.25rem)]',
-    'sm:left-[calc(100vw-var(--crt-bezel)-env(safe-area-inset-right,0px)-9.5rem)]',
+    'right-[calc(var(--crt-bezel)+env(safe-area-inset-right,0px)+1rem)]',
   ].join(' ');
 
   const layoutDocked = [
@@ -60,8 +62,7 @@ export const PortraitLayer = ({ position }: PortraitLayerProps) => {
     'h-[5.25rem] w-[5.25rem] sm:h-24 sm:w-24',
     /* Décalé de l’épaisseur du cadre pour se poser dans le tube, pas sur le plastique. */
     'top-[calc(var(--crt-bezel)+env(safe-area-inset-top,0px)+0.85rem)]',
-    'left-[calc(100vw-var(--crt-bezel)-env(safe-area-inset-right,0px)-6.1rem)]',
-    'sm:left-[calc(100vw-var(--crt-bezel)-env(safe-area-inset-right,0px)-6.9rem)]',
+    'right-[calc(var(--crt-bezel)+env(safe-area-inset-right,0px)+0.85rem)]',
   ].join(' ');
 
   const layout = position === 'login' ? layoutLogin : entered ? layoutDocked : layoutLogin;
